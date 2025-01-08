@@ -139,20 +139,20 @@ class Game:
                     character.change_facing_direction(self.player.rect.center)
                     self.player.unblock()
 
-    def transition_box(self):
-        font = self.fonts['dialog']
-        message = "Do you want to enter this area? (Y)"
-        text = font.render(message, True, (255, 255, 255))
-        rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-        pygame.draw.rect(self.display_surface, (0, 0, 0), rect.inflate(20, 20))
-        self.display_surface.blit(text, rect)
+    # def transition_box(self):
+    #     font = self.fonts['dialog']
+    #     message = "Do you want to enter this area? (Y)"
+    #     text = font.render(message, True, (255, 255, 255))
+    #     rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+    #     pygame.draw.rect(self.display_surface, (0, 0, 0), rect.inflate(20, 20))
+    #     self.display_surface.blit(text, rect)
 
     def transition_check(self):
         sprites = [sprite for sprite in self.transition_sprites if sprite.rect.colliderect(self.player.hitbox)]
         key = pygame.key.get_pressed()
         if sprites:
             self.player.block()
-            self.transition_box()
+            # self.transition_box()
             if key[pygame.K_y]:
                 self.transition_target = sprites[0].target
                 self.tint_mode = 'tint'
