@@ -6,6 +6,7 @@ from entities import Player,Character
 from groups import AllSprites
 from support import *
 from os.path import join
+from dialog import DialogTree
 
 class Game:
     def __init__(self):
@@ -28,7 +29,8 @@ class Game:
 
         self.import_assests()
         self.setup(self.tmx_maps['world'],'house')
-        
+        self.dialog_tree = None
+
     def import_assests(self):
         self.tmx_maps = tmx_importer('data','maps')
 
@@ -128,25 +130,28 @@ class Game:
                     frames = self.overworld_frames['characters'][obj.properties['graphic']],
                     groups = (self.all_sprites,self.collision_sprites,self.character_sprites),
                     facing_direction = obj.properties['direction'],
+                    character_data = TRAINER_DATA[obj.properties['character_id']]
                 )
         
     def input(self):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_SPACE]:
-            for character in self.character_sprites:
-                if check_connection(100,self.player,character):
-                    self.player.block()
-                    character.change_facing_direction(self.player.rect.center)
-                    self.player.unblock()
+        if not self.dialog_tree:
+            key = pygame.key.get_pressed()
+            if key[pygame.K_e]:
+                for character in self.character_sprites:
+                    if check_connection(100,self.player,character):
+                        self.player.block()
+                        character.change_facing_direction(self.player.rect.center)
+                        self.create_dialog(character)
 
-    # def transition_box(self):
-    #     font = self.fonts['dialog']
-    #     message = "Do you want to enter this area? (Y)"
-    #     text = font.render(message, True, (255, 255, 255))
-    #     rect = text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-    #     pygame.draw.rect(self.display_surface, (0, 0, 0), rect.inflate(20, 20))
-    #     self.display_surface.blit(text, rect)
+    def create_dialog(self,character):
+        if not self.dialog_tree:
+            self.dialog_tree = DialogTree(character,self.player,self.all_sprites,self.fonts['dialog'],self.end_dialog)
 
+    def end_dialog(self,character):
+        self.dialog_tree = None
+        self.player.unblock()
+
+			
     def transition_check(self):
         sprites = [sprite for sprite in self.transition_sprites if sprite.rect.colliderect(self.player.hitbox)]
         key = pygame.key.get_pressed()
@@ -192,6 +197,9 @@ class Game:
             self.all_sprites.draw(self.player.rect.center)
             
             self.tint_screen(dt)
+
+            if self.dialog_tree: self.dialog_tree.update()
+
             pygame.display.update()
 
 if __name__ == '__main__':
